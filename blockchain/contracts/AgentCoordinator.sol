@@ -1,21 +1,38 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+abstract contract Ownable {
+    address private _owner;
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    constructor(address initialOwner) {
+        _owner = initialOwner;
+        emit OwnershipTransferred(address(0), initialOwner);
+    }
+    modifier onlyOwner() {
+        require(owner() == msg.sender, "Ownable: caller is not the owner");
+        _;
+    }
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
+}
 
-// Interfaces
 interface ITaskEscrow {
-    function postTask(string memory taskType, string memory title, uint8 complexity, uint256 deadline) external payable returns (uint256);
+    function postTask(string memory taskType, string memory title, uint8 complexity, uint256 deadline, uint8 mode) external payable returns (uint256);
 }
 
 contract AgentCoordinator is Ownable {
-    
     struct MultiTask {
         uint256 rootTaskId;
         address poster;
         uint256 totalBounty;
         uint256[] subTaskIds;
-        mapping(uint256 => uint256) payoutShares; // subTaskId => percentage (1 to 100)
+        mapping(uint256 => uint256) payoutShares;
         bool isCompleted;
     }
 
@@ -31,23 +48,20 @@ contract AgentCoordinator is Ownable {
         escrowContract = _escrowContract;
     }
 
-    // Allows the orchestrator agent to submit a batch of subtasks
-    // The total shares must equal 100
-    // This is an advanced feature skeleton
+    struct SubTaskParams {
+        string taskType;
+        string title;
+        uint8 complexity;
+        uint256 deadline;
+        uint256 share;
+    }
     
-    function createMultiTask(
-        string[] memory taskTypes,
-        string[] memory titles,
-        uint8[] memory complexities,
-        uint256[] memory deadlines,
-        uint256[] memory shares
-    ) external payable returns (uint256) {
+    function createMultiTask(SubTaskParams[] calldata params) external payable returns (uint256) {
         require(msg.value > 0, "Bounty required");
-        require(taskTypes.length == shares.length, "Length mismatch");
         
         uint256 totalShares = 0;
-        for (uint i = 0; i < shares.length; i++) {
-            totalShares += shares[i];
+        for (uint i = 0; i < params.length; i++) {
+            totalShares += params[i].share;
         }
         require(totalShares == 100, "Shares must total 100");
 
@@ -58,24 +72,29 @@ contract AgentCoordinator is Ownable {
         mt.totalBounty = msg.value;
         mt.isCompleted = false;
 
-        for (uint i = 0; i < taskTypes.length; i++) {
-            uint256 subBounty = (msg.value * shares[i]) / 100;
-            
-            // Post task to Escrow contract
-            uint256 subTaskId = ITaskEscrow(escrowContract).postTask{value: subBounty}(
-                taskTypes[i],
-                titles[i],
-                complexities[i],
-                deadlines[i]
-            );
-
-            mt.subTaskIds.push(subTaskId);
-            mt.payoutShares[subTaskId] = shares[i];
-
-            emit SubTaskAdded(multiTaskId, subTaskId, shares[i]);
+        for (uint i = 0; i < params.length; i++) {
+            _processSubTask(multiTaskId, params[i], msg.value);
         }
 
         emit MultiTaskCreated(multiTaskId, msg.sender, msg.value);
         return multiTaskId;
+    }
+
+    function _processSubTask(uint256 multiTaskId, SubTaskParams calldata param, uint256 msgValue) private {
+        uint256 subBounty = (msgValue * param.share) / 100;
+        
+        uint256 subTaskId = ITaskEscrow(escrowContract).postTask{value: subBounty}(
+            param.taskType,
+            param.title,
+            param.complexity,
+            param.deadline,
+            0 // WorkerMode.AgentOnly
+        );
+
+        MultiTask storage mt = multiTasks[multiTaskId];
+        mt.subTaskIds.push(subTaskId);
+        mt.payoutShares[subTaskId] = param.share;
+
+        emit SubTaskAdded(multiTaskId, subTaskId, param.share);
     }
 }
