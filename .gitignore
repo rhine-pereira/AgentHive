@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+backend/venv/
+backend/.env
+*.pyc
+
+# Node
+node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+.npm
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/settings.json
+.idea/
+*.suo
+*.user
+
+# Hardhat
+artifacts/
+cache/
+typechain-types/
+
+# Misc
+*.tmp
+*.bak
+coverage/
+.nyc_output/
+
+
+
+
+backend/claude-code-system-prompts-main
+
+backend/free-claude-code-main
+
+# Workspaces
+backend/workspaces/
