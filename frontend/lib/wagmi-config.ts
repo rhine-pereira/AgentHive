@@ -9,6 +9,7 @@ import {
   sepolia,
   polygonAmoy,
   arbitrumSepolia,
+  monadTestnet,
 } from "@reown/appkit/networks";
 import type { AppKitNetwork } from "@reown/appkit/networks";
 import { QueryClient } from "@tanstack/react-query";
@@ -18,22 +19,8 @@ import { QueryClient } from "@tanstack/react-query";
 export const projectId =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "demo-project-id";
 
-// ── Custom chains not in the registry ───────────────────────────────────────
-export const monadTestnet: AppKitNetwork = {
-  id: 10143,
-  name: "Monad Testnet",
-  nativeCurrency: { name: "MON", symbol: "MON", decimals: 18 },
-  rpcUrls: {
-    default: { http: ["https://testnet-rpc.monad.xyz"] },
-  },
-  blockExplorers: {
-    default: {
-      name: "Monad Explorer",
-      url: "https://monad-testnet.socialscan.io",
-    },
-  },
-  testnet: true,
-};
+// ── Export imported networks for convenience ────────────────────────────────
+export { monadTestnet };
 
 // ── Supported networks ───────────────────────────────────────────────────────
 export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [

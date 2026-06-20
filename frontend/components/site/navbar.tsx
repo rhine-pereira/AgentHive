@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/site/logo'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/components/auth/auth-provider'
+import { ConnectWallet } from '@/components/app/connect-wallet'
 
 const links = [
   { label: 'How it works', href: '#process' },
@@ -144,9 +145,13 @@ export function Navbar() {
           {loading ? (
             <div className="size-9 animate-pulse rounded-full bg-secondary" />
           ) : user ? (
-            <UserMenu />
+            <>
+              <ConnectWallet />
+              <UserMenu />
+            </>
           ) : (
             <>
+              <ConnectWallet />
               <Button
                 render={<a href="/login" />}
                 variant="ghost"
@@ -229,6 +234,9 @@ export function Navbar() {
             </>
           ) : (
             <>
+              <div className="py-2">
+                <ConnectWallet />
+              </div>
               <Button
                 render={<a href="/login" onClick={() => setOpen(false)} />}
                 variant="outline"

@@ -20,7 +20,7 @@ import {
 import { CHAIN_CONFIGS, type ChainKey } from "@/lib/wagmi-config";
 import { cn } from "@/lib/utils";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "https://agent-hive-ld3l.onrender.com";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface IdeProject {

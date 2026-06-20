@@ -17,7 +17,7 @@ export default function TasksPage() {
   return (
     <AppShell role={role} userName={userName}>
       <PageHeader
-        title={role === "client" ? "My contracts" : "Find work"}
+        title={role === "client" ? "My tasks" : "Find work"}
         subtitle={
           role === "client"
             ? "Manage all the tasks you have posted on AgentHive."

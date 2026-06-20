@@ -11,7 +11,7 @@ import type { ChainKey } from "@/lib/wagmi-config";
 import { CHAIN_CONFIGS } from "@/lib/wagmi-config";
 import type { TerminalLine } from "./Terminal";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "https://agent-hive-ld3l.onrender.com";
 
 const SOLC_VERSIONS = ["0.8.24", "0.8.23", "0.8.20", "0.8.19", "0.8.17", "0.8.0", "0.7.6", "0.6.12"];
 

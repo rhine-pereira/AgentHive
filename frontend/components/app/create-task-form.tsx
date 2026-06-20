@@ -11,6 +11,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { createClient } from "@/lib/supabase"
 import { useAuth } from "@/components/auth/auth-provider"
+import { usePostTask } from "@/hooks/useBlockchain"
+import { useAccount } from "wagmi"
+import { ConnectWallet } from "@/components/app/connect-wallet"
+import { decodeEventLog } from "viem"
+import { taskEscrowAbi } from "@/lib/abi/task-escrow"
 import {
   executorMeta,
   getPaymentSplit,
@@ -29,14 +34,17 @@ const categories = ["Automation", "Design", "Data", "Content", "Development", "M
 export function CreateTaskForm() {
   const router = useRouter()
   const { user } = useAuth()
+  const { isConnected, address } = useAccount()
+  const { execute: postTask, isPending: isPosting } = usePostTask()
+  
   const [executor, setExecutor] = useState<ExecutorType>("agent")
-  const [budget, setBudget] = useState(2000)
+  const [budget, setBudget] = useState(0.01)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
 
   const split = getPaymentSplit(executor)
   const amounts = useMemo(() => splitAmount(executor, budget), [executor, budget])
-  const fee = Math.round(budget * 0.05)
+  const fee = Number((budget * 0.05).toFixed(4))
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -44,51 +52,78 @@ export function CreateTaskForm() {
       setError("You must be logged in to post a task.")
       return
     }
+    if (!isConnected || !address) {
+      setError("You must connect your wallet to post a task.")
+      return
+    }
 
     setError("")
     setSubmitting(true)
 
-    const form = new FormData(e.currentTarget)
-    const title = form.get("title") as string
-    const category = form.get("category") as string
-    const skillsRaw = form.get("skills") as string
-    const description = form.get("desc") as string
+    try {
+      const form = new FormData(e.currentTarget)
+      const title = form.get("title") as string
+      const category = form.get("category") as string
+      const skillsRaw = form.get("skills") as string
+      const description = form.get("desc") as string
 
-    const skills = skillsRaw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean)
+      const skills = skillsRaw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
 
-    const supabase = createClient()
+      // 1. On-chain Escrow
+      // WorkerMode: AgentOnly = 0, FreelancerOnly = 1, Mixed = 2
+      let mode = 0;
+      if (executor === "freelancer") mode = 1;
+      else if (executor === "both") mode = 2;
 
-    const userName =
-      user.user_metadata?.full_name ||
-      user.user_metadata?.name ||
-      user.email?.split("@")[0] ||
-      "Anonymous"
+      // Deadline: 7 days from now (hardcoded for simplicity in demo)
+      const deadline = BigInt(Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60);
+      
+      const totalAmount = (budget + fee).toString();
+      
+      const txHash = await postTask("postTask", [category.toLowerCase(), title, 1, deadline, mode], totalAmount);
 
-    const { error: insertError } = await supabase.from("tasks").insert({
-      title,
-      description,
-      task_type: category.toLowerCase(),
-      category,
-      executor_type: executor,
-      bounty_amount: budget,
-      skills,
-      tags: skills,
-      poster_id: user.id,
-      poster_address: user.email ?? "",
-      poster_name: userName,
-      status: "open",
-    })
+      // 2. Off-chain Supabase
+      const supabase = createClient()
+      const userName =
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        user.email?.split("@")[0] ||
+        "Anonymous"
 
-    if (insertError) {
-      setError(insertError.message)
+      const { error: insertError } = await supabase.from("tasks").insert({
+        title,
+        description,
+        task_type: category.toLowerCase(),
+        category,
+        executor_type: executor,
+        bounty_amount: budget,
+        skills,
+        tags: skills,
+        poster_id: user.id,
+        poster_address: address,
+        poster_name: userName,
+        status: "open",
+        escrow_tx_hash: txHash,
+      })
+
+      if (insertError) throw insertError;
+
+      router.push("/tasks")
+    } catch (err: any) {
+      let msg = err.message || "Failed to post task"
+      if (msg.includes("User rejected the request") || msg.includes("rejected transaction")) {
+        msg = "Transaction rejected by user."
+      } else if (msg.includes("Failed to fetch")) {
+        msg = "Network error: Unable to reach the blockchain RPC. Please try again later."
+      } else {
+        console.error("Task creation error:", err)
+      }
+      setError(msg)
       setSubmitting(false)
-      return
     }
-
-    router.push("/dashboard")
   }
 
   return (
@@ -200,19 +235,15 @@ export function CreateTaskForm() {
           </div>
 
           <div className="mt-5 flex flex-col gap-2">
-            <Label htmlFor="budget">Budget (USD)</Label>
+            <Label htmlFor="budget">Budget (MON)</Label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                $
-              </span>
               <Input
                 id="budget"
                 type="number"
-                min={100}
-                step={50}
+                min={0}
+                step={0.001}
                 value={budget}
                 onChange={(e) => setBudget(Number(e.target.value) || 0)}
-                className="pl-7"
               />
             </div>
           </div>
@@ -229,7 +260,7 @@ export function CreateTaskForm() {
             </h2>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            How <span className="text-foreground">${budget.toLocaleString()}</span> will
+            How <span className="text-foreground">{budget} MON</span> will
             be distributed on completion.
           </p>
 
@@ -265,16 +296,16 @@ export function CreateTaskForm() {
           <div className="mt-5 space-y-2 border-t border-border pt-4 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>Task budget</span>
-              <span className="text-foreground">${budget.toLocaleString()}</span>
+              <span className="text-foreground">{budget} MON</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>Platform fee (5%)</span>
-              <span className="text-foreground">${fee.toLocaleString()}</span>
+              <span className="text-foreground">{fee} MON</span>
             </div>
             <div className="flex justify-between font-medium">
               <span>Total charged</span>
               <span className="font-heading text-base">
-                ${(budget + fee).toLocaleString()}
+                {(budget + fee).toFixed(4)} MON
               </span>
             </div>
           </div>
@@ -283,8 +314,8 @@ export function CreateTaskForm() {
             {executorMeta[executor].description}
           </p>
 
-          <Button type="submit" size="lg" className="mt-5 w-full rounded-xl" disabled={submitting}>
-            {submitting ? (
+          <Button type="submit" size="lg" className="mt-5 w-full rounded-xl" disabled={submitting || isPosting}>
+            {submitting || isPosting ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
               <>
@@ -322,7 +353,7 @@ function SplitRow({
       </span>
       <span className="text-right">
         <span className="block text-sm font-semibold">
-          ${amount.toLocaleString()}
+          {amount.toLocaleString()} MON
         </span>
         <span className="block text-xs text-muted-foreground">{pct}%</span>
       </span>

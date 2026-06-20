@@ -24,15 +24,15 @@ export default function EarningsPage() {
         action={
           <Button className="rounded-xl">
             <Wallet className="size-4" />
-            Withdraw $4,820
+            Withdraw 4,820 MON
           </Button>
         }
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Available" value="$4,820" icon={<Wallet className="size-4.5" />} />
-        <StatCard label="In escrow" value="$3,150" hint="releases on approval" icon={<Clock className="size-4.5" />} />
-        <StatCard label="Lifetime earned" value={currentFreelancer.earned} icon={<CheckCircle2 className="size-4.5" />} />
+        <StatCard label="Available" value="4,820 MON" icon={<Wallet className="size-4.5" />} />
+        <StatCard label="In escrow" value="3,150 MON" hint="releases on approval" icon={<Clock className="size-4.5" />} />
+        <StatCard label="Lifetime earned" value={currentFreelancer.earned.replace('$', '') + ' MON'} icon={<CheckCircle2 className="size-4.5" />} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
@@ -68,7 +68,7 @@ export default function EarningsPage() {
                   <p className="text-xs text-muted-foreground">{p.date}</p>
                 </div>
                 <div className="ml-3 text-right">
-                  <p className="text-sm font-semibold">${p.amount.toLocaleString()}</p>
+                  <p className="text-sm font-semibold">{p.amount.toLocaleString()} MON</p>
                   <span
                     className={cn(
                       "text-xs",

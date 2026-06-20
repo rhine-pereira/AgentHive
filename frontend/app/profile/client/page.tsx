@@ -93,7 +93,7 @@ export default function ClientProfilePage() {
         <div className="flex flex-col gap-4">
           <StatCard 
             label="Total spent" 
-            value={loading ? "..." : `$${stats.spent.toLocaleString()}`} 
+            value={loading ? "..." : `${stats.spent.toLocaleString()} MON`} 
             hint="all-time" 
           />
           <StatCard 

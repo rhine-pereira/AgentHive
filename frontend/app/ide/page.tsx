@@ -16,7 +16,7 @@ import { DeployPanel } from "@/components/ide/DeployPanel";
 import { Terminal, type TerminalLine } from "@/components/ide/Terminal";
 import type { ChainKey } from "@/lib/wagmi-config";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "https://agent-hive-ld3l.onrender.com";
 
 const DEFAULT_CONTRACT = `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;

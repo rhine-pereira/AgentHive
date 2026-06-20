@@ -5,7 +5,8 @@ import { cookies } from "next/headers"
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get("code")
-  const next = searchParams.get("next") ?? "/dashboard"
+  const paramRole = searchParams.get("role")
+  let next = searchParams.get("next") ?? "/dashboard"
 
   if (code) {
     const cookieStore = await cookies()
@@ -36,14 +37,32 @@ export async function GET(request: Request) {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          const meta = user.user_metadata || {}
+          let meta = user.user_metadata || {}
+          let finalRole = meta.role || paramRole
+
+          // If a new role was passed during Google signup that differs, update metadata
+          if (paramRole && meta.role !== paramRole) {
+            await supabase.auth.updateUser({ data: { role: paramRole } })
+            finalRole = paramRole
+          }
+
+          // If STILL no role, this is a first-time Google login from the Login page!
+          if (!finalRole) {
+            return NextResponse.redirect(`${origin}/onboarding`)
+          }
+
+          // Dynamic redirect based on role if next is default
+          if (next === "/dashboard" && finalRole === "freelancer") {
+            next = "/freelancer"
+          }
+
           await supabase.from("users").upsert(
             {
               id: user.id,
               email: user.email ?? "",
               full_name: meta.full_name || meta.name || "",
               avatar_url: meta.avatar_url || meta.picture || "",
-              role: meta.role || "client",
+              role: finalRole,
             },
             { onConflict: "id" },
           )

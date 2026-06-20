@@ -30,13 +30,13 @@ export default function FreelancerDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Available balance"
-          value="$4,820"
+          value="4,820 MON"
           hint="ready to withdraw"
           icon={<Wallet className="size-4.5" />}
         />
         <StatCard
           label="In escrow"
-          value="$3,150"
+          value="3,150 MON"
           hint="across 3 contracts"
           icon={<TrendingUp className="size-4.5" />}
         />
@@ -85,7 +85,7 @@ export default function FreelancerDashboard() {
                   </span>
                   <div className="text-right">
                     <p className="text-sm font-semibold">
-                      ${earn.toLocaleString()}
+                      {earn.toLocaleString()} MON
                     </p>
                     <p className="text-xs text-muted-foreground">your share</p>
                   </div>

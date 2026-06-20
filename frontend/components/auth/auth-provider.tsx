@@ -9,7 +9,7 @@ type AuthContextType = {
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null, data?: any }>
   signUp: (email: string, password: string, meta?: { name?: string; role?: string }) => Promise<{ error: AuthError | null, data?: any }>
-  signInWithGoogle: () => Promise<{ error: AuthError | null }>
+  signInWithGoogle: (role?: string) => Promise<{ error: AuthError | null }>
   signOut: () => Promise<void>
 }
 
@@ -80,11 +80,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error, data }
   }, [])
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogle = useCallback(async (role: string = "client") => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?role=${role}`,
       },
     })
     return { error }

@@ -21,6 +21,9 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ['400', '500', '600'],
 })
 
+import { WagmiProviders } from '@/providers/WagmiProviders'
+import { TransactionToastProvider } from '@/components/app/transaction-toast'
+
 export const metadata: Metadata = {
   title: 'AgentHive — Smart AI Automation for Your Business',
   description:
@@ -44,7 +47,11 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased">
         <AuthProvider>
-          {children}
+          <WagmiProviders>
+            <TransactionToastProvider>
+              {children}
+            </TransactionToastProvider>
+          </WagmiProviders>
         </AuthProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

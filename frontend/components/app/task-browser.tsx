@@ -82,7 +82,7 @@ export function TaskBrowser({ filterExecutor, clientOnly }: { filterExecutor?: "
       setLoading(false)
     }
     fetchTasks()
-  }, [])
+  }, [clientOnly, role, user?.id])
 
   const filtered = useMemo(() => {
     return tasks.filter((t) => {

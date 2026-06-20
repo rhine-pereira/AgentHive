@@ -12,7 +12,7 @@ import { CHAIN_CONFIGS, type ChainKey } from "@/lib/wagmi-config";
 import type { CompiledContract } from "./CompilePanel";
 import type { TerminalLine } from "./Terminal";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "https://agent-hive-ld3l.onrender.com";
 
 interface DeployedContract {
   name: string;

@@ -39,9 +39,9 @@ export default function ClientEarningsPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Account balance" value="$0" icon={<Wallet className="size-4.5" />} />
-        <StatCard label="Funds in escrow" value="$3,150" hint="awaiting task approval" icon={<Clock className="size-4.5" />} />
-        <StatCard label="Total spent" value="$12,400" icon={<CheckCircle2 className="size-4.5" />} />
+        <StatCard label="Account balance" value="0 MON" icon={<Wallet className="size-4.5" />} />
+        <StatCard label="Funds in escrow" value="3,150 MON" hint="awaiting task approval" icon={<Clock className="size-4.5" />} />
+        <StatCard label="Total spent" value="12,400 MON" icon={<CheckCircle2 className="size-4.5" />} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
@@ -77,7 +77,7 @@ export default function ClientEarningsPage() {
                   <p className="text-xs text-muted-foreground">{p.date}</p>
                 </div>
                 <div className="ml-3 text-right">
-                  <p className="text-sm font-semibold">${p.amount.toLocaleString()}</p>
+                  <p className="text-sm font-semibold">{p.amount.toLocaleString()} MON</p>
                   <span
                     className={cn(
                       "text-xs",

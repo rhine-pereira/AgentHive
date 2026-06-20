@@ -25,14 +25,14 @@ function GoogleIcon({ className }: { className?: string }) {
 const roles = [
   {
     id: "client" as const,
-    title: "I want work done",
-    desc: "Post tasks and hire agents or freelancers.",
+    title: "Client",
+    desc: "I want to post tasks and hire talent.",
     icon: Briefcase,
   },
   {
     id: "freelancer" as const,
-    title: "I want to earn",
-    desc: "Find tasks and get paid for your skills.",
+    title: "Freelancer",
+    desc: "I want to find tasks and earn money.",
     icon: Hammer,
   },
 ]
@@ -87,7 +87,7 @@ export default function SignupPage() {
 
   async function handleGoogleSignup() {
     setError("")
-    const { error: authError } = await signInWithGoogle()
+    const { error: authError } = await signInWithGoogle(role)
     if (authError) {
       setError(authError.message)
     }

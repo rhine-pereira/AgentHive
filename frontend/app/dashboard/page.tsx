@@ -108,7 +108,7 @@ export default function ClientDashboard() {
         />
         <StatCard
           label="Total spent"
-          value={`$${totalSpent.toLocaleString()}`}
+          value={`${totalSpent.toLocaleString()} MON`}
           hint={`across ${tasks.length} tasks`}
           icon={<Wallet className="size-4.5" />}
         />
@@ -182,7 +182,7 @@ export default function ClientDashboard() {
                   <div className="flex items-center justify-between">
                     <ExecutorBadge executor={r.executor} />
                     <span className="text-sm font-medium">
-                      ${r.total.toLocaleString()}
+                      {r.total.toLocaleString()} MON
                     </span>
                   </div>
                   <div className="mt-2 flex h-2 overflow-hidden rounded-full bg-secondary">

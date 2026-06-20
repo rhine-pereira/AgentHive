@@ -23,6 +23,7 @@ import { Avatar } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import type { Role } from "@/lib/data"
 import { useAuth } from "@/components/auth/auth-provider"
+import { ConnectWallet } from "@/components/app/connect-wallet"
 
 function UserAvatar({ name, avatarUrl, size = 'md' }: { name: string; avatarUrl?: string; size?: 'sm' | 'md' }) {
   const initials = name
@@ -134,7 +135,7 @@ const clientNav: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/tasks/new", label: "Post a task", icon: PlusCircle },
   { href: "/tasks", label: "Browse tasks", icon: Compass },
-  { href: "/tasks", label: "My contracts", icon: ListChecks },
+  { href: "/tasks/mine", label: "My contracts", icon: ListChecks },
   { href: "/dashboard/earnings", label: "Earnings", icon: Wallet },
   { href: "/ide", label: "Smart Contract IDE", icon: Code2 },
   { href: "/profile/client", label: "Profile", icon: UserIcon },
@@ -200,7 +201,7 @@ export function AppShell({
                 pathname.startsWith(item.href))
             return (
               <Link
-                key={`${item.href}-${item.label}`}
+                key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
@@ -267,6 +268,7 @@ export function AppShell({
               <Bell className="size-4.5" />
               <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-primary" />
             </button>
+            <ConnectWallet />
             <UserMenu />
           </div>
         </header>

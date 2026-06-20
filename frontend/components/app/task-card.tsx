@@ -41,7 +41,7 @@ export function TaskCard({ task }: { task: Task }) {
         <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
           <div>
             <p className="font-heading text-lg font-semibold">
-              ${task.budget.toLocaleString()}
+              {task.budget.toLocaleString()} MON
             </p>
             <p className="text-xs text-muted-foreground">fixed budget</p>
           </div>

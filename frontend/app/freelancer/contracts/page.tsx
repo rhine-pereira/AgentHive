@@ -49,7 +49,7 @@ export default function ContractsPage() {
                   {status.label}
                 </span>
                 <span className="text-sm font-semibold sm:text-right">
-                  ${earn.toLocaleString()}
+                  {earn.toLocaleString()} MON
                 </span>
               </Link>
             )
